@@ -1,6 +1,7 @@
 #!/bin/bash
 PACKAGE=openstack-xen-plugins
-RPMBUILD_DIR=$PWD/rpmbuild
+RPMBUILD_DIR=$(cd $(dirname $0) && pwd)/rpmbuild
+
 if [ ! -d $RPMBUILD_DIR ]; then
     echo $RPMBUILD_DIR is missing
     exit 1
