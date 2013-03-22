@@ -515,6 +515,8 @@ class XenAPIDriver(driver.ComputeDriver):
 
             sr_ref = self._session.call_xenapi('SR.get_by_uuid', sr_uuid)
             sr_uuid_map[vdi_uuid] = sr_ref
+
+        LOG.error("bobba:pre_live_migration %s", sr_uuid_map)
             
         return sr_uuid_map
 

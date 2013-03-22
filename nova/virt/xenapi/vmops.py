@@ -1705,9 +1705,13 @@ class VMOps(object):
 
         # Add destination SR refs for all of the VDIs that we created
         # as part of the pre migration callback
+        LOG.error("bobba:_call_live_migrate_command %s", vdi_map)
         if migrate_data.has_key('pre_migration_data'):
-            for vdi in migrate_data['pre_migration_data']:
-                vdi_map[vdi] = migrate_data['pre_migration_data'][vdi]
+            pre_migrate_data = migrate_data['pre_migration_data']
+            LOG.error("bobba:_call_live_migrate_command %s", pre_migrate_data)
+            for vdi in pre_migrate_data:
+                vdi_map[vdi] = pre_migrate_data[vdi]
+        LOG.error("bobba:_call_live_migrate_command %s", vdi_map)
         vif_map = {}
         options = {}
         self._session.call_xenapi(command_name, vm_ref,
