@@ -507,14 +507,14 @@ class XenAPIDriver(driver.ComputeDriver):
 
         sr_uuid_map = {}
         for block_device_map in block_device_info['block_device_mapping']:
-            sr_uuid, vdi_uuid = self._volumeops.attach_volume(
+            sr_uuid, _ = self._volumeops.attach_volume(
                 block_device_map['connection_info'],
                 None,
                 block_device_map['mount_device'],
                 hotplug=False)
 
             sr_ref = self._session.call_xenapi('SR.get_by_uuid', sr_uuid)
-            sr_uuid_map[vdi_uuid] = sr_ref
+            sr_uuid_map[sr_uuid] = sr_ref
 
         LOG.error("bobba:pre_live_migration %s", sr_uuid_map)
             

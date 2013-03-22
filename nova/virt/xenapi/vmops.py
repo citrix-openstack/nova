@@ -1689,9 +1689,10 @@ class VMOps(object):
                 raise exception.MigrationError(_('VM.assert_can_migrate'
                                                  'failed'))
 
-    def _generate_vdi_map(self, destination_sr_ref, vm_ref):
+    def _generate_vdi_map(self, destination_sr_ref, vm_ref, sr_ref=None):
         """generate a vdi_map for _call_live_migrate_command."""
-        sr_ref = vm_utils.safe_find_sr(self._session)
+        if sr_ref is None:
+            sr_ref = vm_utils.safe_find_sr(self._session)
         vm_vdis = vm_utils.get_instance_vdis_for_sr(self._session,
                                                     vm_ref, sr_ref)
         return dict((vdi, destination_sr_ref) for vdi in vm_vdis)
@@ -1705,13 +1706,16 @@ class VMOps(object):
 
         # Add destination SR refs for all of the VDIs that we created
         # as part of the pre migration callback
-        LOG.error("bobba:_call_live_migrate_command %s", vdi_map)
+        LOG.error("bobba:_call_live_migrate_command (pre) %s", vdi_map)
         if migrate_data.has_key('pre_migration_data'):
             pre_migrate_data = migrate_data['pre_migration_data']
             LOG.error("bobba:_call_live_migrate_command %s", pre_migrate_data)
-            for vdi in pre_migrate_data:
-                vdi_map[vdi] = pre_migrate_data[vdi]
-        LOG.error("bobba:_call_live_migrate_command %s", vdi_map)
+            for sr_uuid in pre_migrate_data:
+                sr_ref = self._session.call_xenapi("SR.get_by_uuid", sr_uuid)
+                vdi_map.extend(
+                    self._generate_vdi_map(
+                        pre_migrate_data[sr_uuid], vm_ref, sr_ref))
+        LOG.error("bobba:_call_live_migrate_command (post) %s", vdi_map)
         vif_map = {}
         options = {}
         self._session.call_xenapi(command_name, vm_ref,
