@@ -513,7 +513,7 @@ class XenAPIDriver(driver.ComputeDriver):
                 block_device_map['mount_device'],
                 hotplug=False)
 
-            sr_ref = self._session.call_xenapi('SR.find_by_uuid', sr_uuid)
+            sr_ref = self._session.call_xenapi('SR.get_by_uuid', sr_uuid)
             sr_uuid_map[vdi_uuid] = sr_ref
             
         return sr_uuid_map
