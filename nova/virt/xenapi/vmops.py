@@ -1702,6 +1702,12 @@ class VMOps(object):
         migrate_send_data = migrate_data['migrate_send_data']
 
         vdi_map = self._generate_vdi_map(destination_sr_ref, vm_ref)
+
+        # Add destination SR refs for all of the VDIs that we created
+        # as part of the pre migration callback
+        if migrate_data.has_key('pre_migration_data'):
+            for vdi in migrate_data['pre_migration_data']:
+                vdi_map[vdi] = migrate_data['pre_migration_data'][vdi]
         vif_map = {}
         options = {}
         self._session.call_xenapi(command_name, vm_ref,

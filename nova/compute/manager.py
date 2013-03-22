@@ -3103,7 +3103,6 @@ class ComputeManager(manager.SchedulerDependentManager):
                 context, instance,
                 block_migration, disk, dest, migrate_data)
             migrate_data['pre_migration_data'] = pre_migration_data
-            LOG.error('Pre migration data: %s', pre_migration_data)
 
         except Exception:
             with excutils.save_and_reraise_exception():
