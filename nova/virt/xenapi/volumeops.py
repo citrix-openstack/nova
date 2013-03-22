@@ -68,7 +68,7 @@ class VolumeOps(object):
         LOG.info(_('Mountpoint %(mountpoint)s attached to'
                 ' instance %(instance_name)s') % locals())
         
-        return sr_vdi_info
+        return (sr_uuid, vdi_uuid)
 
     def _connect_volume(self, connection_data, dev_number, instance_name,
                         vm_ref, hotplug=True):
