@@ -507,7 +507,7 @@ class XenAPIDriver(driver.ComputeDriver):
 
         sr_uuid_map = {}
         for block_device_map in block_device_info['block_device_mapping']:
-            vdi_uuid, sr_uuid = self._volumeops.attach_volume(
+            sr_uuid, vdi_uuid = self._volumeops.attach_volume(
                 block_device_map['connection_info'],
                 None,
                 block_device_map['mount_device'],
