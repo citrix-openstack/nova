@@ -1712,7 +1712,7 @@ class VMOps(object):
             LOG.error("bobba:_call_live_migrate_command %s", pre_migrate_data)
             for sr_uuid in pre_migrate_data:
                 sr_ref = self._session.call_xenapi("SR.get_by_uuid", sr_uuid)
-                vdi_map.extend(
+                vdi_map.update(
                     self._generate_vdi_map(
                         pre_migrate_data[sr_uuid], vm_ref, sr_ref))
         LOG.error("bobba:_call_live_migrate_command (post) %s", vdi_map)
