@@ -505,14 +505,18 @@ class XenAPIDriver(driver.ComputeDriver):
         """
         # TODO(JohnGarbutt) look again when boot-from-volume hits trunk
 
+        sr_uuid_map = {}
         for block_device_map in block_device_info['block_device_mapping']:
-            LOG.error('pre_live_migration: %s',
-                      block_device_map['connection_info'])
-            self._volumeops.attach_volume(block_device_map['connection_info'],
-                                          None,
-                                          block_device_map['mount_device'],
-                                          hotplug=False)
-        return {'Yay': 1}
+            vdi_uuid, sr_uuid = self._volumeops.attach_volume(
+                block_device_map['connection_info'],
+                None,
+                block_device_map['mount_device'],
+                hotplug=False)
+
+            sr_ref = self._session.call_xenapi('SR.find_by_uuid', sr_uuid)
+            sr_uuid_map[vdi_uuid] = sr_ref
+            
+        return sr_uuid_map
 
     def post_live_migration_at_destination(self, ctxt, instance_ref,
                                            network_info, block_migration,

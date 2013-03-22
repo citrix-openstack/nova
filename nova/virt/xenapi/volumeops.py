@@ -61,11 +61,14 @@ class VolumeOps(object):
         connection_data = connection_info['data']
         dev_number = volume_utils.get_device_number(mountpoint)
 
-        self._connect_volume(connection_data, dev_number, instance_name,
-                            vm_ref, hotplug=hotplug)
+        sr_uuid, vdi_uuid = self._connect_volume(connection_data, dev_number,
+                                                 instance_name, vm_ref,
+                                                 hotplug=hotplug)
 
         LOG.info(_('Mountpoint %(mountpoint)s attached to'
                 ' instance %(instance_name)s') % locals())
+        
+        return sr_vdi_info
 
     def _connect_volume(self, connection_data, dev_number, instance_name,
                         vm_ref, hotplug=True):
@@ -100,6 +103,9 @@ class VolumeOps(object):
 
                 if hotplug:
                     self._session.call_xenapi("VBD.plug", vbd_ref)
+
+            vdi_uuid = self._session.call_xenapi("VDI.get_uuid", vdi_ref)
+            return (sr_uuid, vdi_uuid)
         except Exception:
             # NOTE(sirp): Forgetting the SR will have the effect of cleaning up
             # the VDI and VBD records, so no need to handle that explicitly.
