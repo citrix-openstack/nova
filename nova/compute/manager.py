@@ -3058,7 +3058,7 @@ class ComputeManager(manager.SchedulerDependentManager):
             raise exception.FixedIpNotFoundForInstance(
                                        instance_uuid=instance['uuid'])
 
-        self.driver.pre_live_migration(context, instance,
+        pre_live_migration_data = self.driver.pre_live_migration(context, instance,
                                        block_device_info,
                                        self._legacy_nw_info(network_info),
                                        migrate_data)
@@ -3080,6 +3080,8 @@ class ComputeManager(manager.SchedulerDependentManager):
         if block_migration:
             self.driver.pre_block_migration(context, instance, disk)
 
+        return pre_live_migration_data
+
     def live_migration(self, context, dest, instance,
                        block_migration=False, migrate_data=None):
         """Executing live migration.
@@ -3097,8 +3099,11 @@ class ComputeManager(manager.SchedulerDependentManager):
             else:
                 disk = None
 
-            self.compute_rpcapi.pre_live_migration(context, instance,
-                    block_migration, disk, dest, migrate_data)
+            pre_migration_data = self.compute_rpcapi.pre_live_migration(
+                context, instance,
+                block_migration, disk, dest, migrate_data)
+            migrate_data['pre_migration_data'] = pre_migration_data
+            LOG.error('Pre migration data: %s', pre_migration_data)
 
         except Exception:
             with excutils.save_and_reraise_exception():

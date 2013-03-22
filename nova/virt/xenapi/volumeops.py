@@ -38,9 +38,17 @@ class VolumeOps(object):
 
     def attach_volume(self, connection_info, instance_name, mountpoint,
                       hotplug=True):
-        """Attach volume storage to VM instance."""
+        """
+        Attach volume storage to VM instance.
 
-        vm_ref = vm_utils.vm_ref_or_raise(self._session, instance_name)
+        Supports instance_name being None if you just want to enable the
+        SR, e.g. during live migration
+        """
+
+        if instance_name is not None:
+            vm_ref = vm_utils.vm_ref_or_raise(self._session, instance_name)
+        else:
+            vm_ref = None
 
         # NOTE: No Resource Pool concept so far
         LOG.debug(_("Attach_volume: %(connection_info)s, %(instance_name)s,"
@@ -85,12 +93,13 @@ class VolumeOps(object):
                 vdi_ref = volume_utils.introduce_vdi(self._session, sr_ref)
 
             # Attach
-            vbd_ref = vm_utils.create_vbd(self._session, vm_ref, vdi_ref,
-                                          dev_number, bootable=False,
-                                          osvol=True)
+            if vm_ref:
+                vbd_ref = vm_utils.create_vbd(self._session, vm_ref, vdi_ref,
+                                              dev_number, bootable=False,
+                                              osvol=True)
 
-            if hotplug:
-                self._session.call_xenapi("VBD.plug", vbd_ref)
+                if hotplug:
+                    self._session.call_xenapi("VBD.plug", vbd_ref)
         except Exception:
             # NOTE(sirp): Forgetting the SR will have the effect of cleaning up
             # the VDI and VBD records, so no need to handle that explicitly.
@@ -103,7 +112,14 @@ class VolumeOps(object):
                 % locals())
 
         device_number = volume_utils.get_device_number(mountpoint)
-        vm_ref = vm_utils.vm_ref_or_raise(self._session, instance_name)
+        vm_ref = vm_utils.lookup(self._session, instance_name)
+        if vm_ref is None:
+            # Note(bobba): instance may not exist, but the SR may need
+            # cleaning up
+            uuid, label, params = volume_utils.parse_sr_info(connection_info['data'])
+            sr_ref = volume_utils.find_sr_by_uuid(self._session, uuid)
+            volume_utils.purge_sr(self._session, sr_ref)
+            return
 
         try:
             vbd_ref = vm_utils.find_vbd_by_number(
