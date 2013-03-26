@@ -3147,7 +3147,7 @@ class ComputeManager(manager.SchedulerDependentManager):
 
             LOG.error('Disconnecting volume %s', bdm['volume_id'])
             # Detach from the hypervisor and terminate the connection
-            self.driver.detach_volume(bdm['connection_info'], None, None)
+            self.driver.detach_volume(bdm['connection_info'], {'name':None}, None)
             volume = self.volume_api.get(ctxt, bdm['volume_id'])
             self.volume_api.terminate_connection(ctxt, volume, connector)
 
