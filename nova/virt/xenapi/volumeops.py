@@ -117,7 +117,6 @@ class VolumeOps(object):
         LOG.debug(_("Detach_volume: %(instance_name)s, %(mountpoint)s")
                 % locals())
 
-        device_number = volume_utils.get_device_number(mountpoint)
         vm_ref = vm_utils.lookup(self._session, instance_name)
         if vm_ref is None:
             # Note(bobba): instance may not exist, but the SR may need
@@ -127,6 +126,7 @@ class VolumeOps(object):
             volume_utils.purge_sr(self._session, sr_ref)
             return
 
+        device_number = volume_utils.get_device_number(mountpoint)
         try:
             vbd_ref = vm_utils.find_vbd_by_number(
                     self._session, vm_ref, device_number)
