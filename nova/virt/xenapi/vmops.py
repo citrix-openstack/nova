@@ -1706,16 +1706,13 @@ class VMOps(object):
 
         # Add destination SR refs for all of the VDIs that we created
         # as part of the pre migration callback
-        LOG.error("bobba:_call_live_migrate_command (pre) %s", vdi_map)
         if migrate_data.has_key('pre_migration_data'):
             pre_migrate_data = migrate_data['pre_migration_data']
-            LOG.error("bobba:_call_live_migrate_command %s", pre_migrate_data)
             for sr_uuid in pre_migrate_data:
                 sr_ref = self._session.call_xenapi("SR.get_by_uuid", sr_uuid)
                 vdi_map.update(
                     self._generate_vdi_map(
                         pre_migrate_data[sr_uuid], vm_ref, sr_ref))
-        LOG.error("bobba:_call_live_migrate_command (post) %s", vdi_map)
         vif_map = {}
         options = {}
         self._session.call_xenapi(command_name, vm_ref,

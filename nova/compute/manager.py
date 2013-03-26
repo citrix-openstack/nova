@@ -3138,12 +3138,14 @@ class ComputeManager(manager.SchedulerDependentManager):
                  instance=instance_ref)
 
         # Detaching volumes.
+        LOG.error('Looking for volumes...')
         connector = self.driver.get_volume_connector(instance_ref)
         for bdm in self._get_instance_volume_bdms(ctxt, instance_ref):
             # NOTE(vish): We don't want to actually mark the volume
             #             detached, or delete the bdm, just remove the
             #             connection from this host.
 
+            LOG.error('Disconnecting volume %s', bdm['volume_id'])
             # remove the volume connection without detaching from hypervisor
             # because the instance is not running anymore on the current host
             volume = self.volume_api.get(ctxt, bdm['volume_id'])
