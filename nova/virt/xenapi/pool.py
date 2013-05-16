@@ -90,7 +90,7 @@ class ResourcePool(object):
             self._virtapi.aggregate_metadata_add(context, aggregate,
                                                  {pool_states.KEY:
                                                       pool_states.CHANGING})
-        if len(aggregate['hosts']) == 1:
+        if len(aggregate['hosts']) == 0:
             # this is the first host of the pool -> make it master
             self._init_pool(aggregate['id'], aggregate['name'])
             # save metadata so that we can find the master again
