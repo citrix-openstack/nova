@@ -80,17 +80,16 @@ class ResourcePool(object):
                    pool_states.DISMISSED: 'aggregate deleted',
                    pool_states.ERROR: 'aggregate in error'}
 
-        if (aggregate['metadetails'][pool_states.KEY] in invalid.keys()):
+        if (aggregate['metadetails'].get(pool_states.KEY, '') in invalid.keys()):
             raise exception.InvalidAggregateAction(
-                    action='add host',
-                    aggregate_id=aggregate['id'],
-                    reason=aggregate['metadetails'][pool_states.KEY])
+                action='add host',
+                aggregate_id=aggregate['id'],
+                reason=aggregate['metadetails'][pool_states.KEY])
 
-        if (aggregate['metadetails'][pool_states.KEY] == pool_states.CREATED):
+        if len(aggregate['hosts']) == 0:
             self._virtapi.aggregate_metadata_add(context, aggregate,
                                                  {pool_states.KEY:
-                                                      pool_states.CHANGING})
-        if len(aggregate['hosts']) == 0:
+                                                  pool_states.CHANGING})
             # this is the first host of the pool -> make it master
             self._init_pool(aggregate['id'], aggregate['name'])
             # save metadata so that we can find the master again
