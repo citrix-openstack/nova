@@ -478,6 +478,24 @@ def create_vdi(session, sr_ref, instance, name_label, disk_type, virtual_size,
 
 
 def get_vdi_uuid_for_volume(session, connection_data):
+    try:
+        rbd_sr_uuid = '97781b61-55eb-571a-6b93-c80b254342a6'
+        sr_ref = volume_utils.find_sr_by_uuid(session, rbd_sr_uuid)
+
+        pool, volume_name = connection_data['name'].split('/')
+
+        LOG.info("Scanning SR")
+        session.call_xenapi("SR.scan", sr_ref)
+
+        LOG.info("Searching for vdi by name %s", volume_name)
+        vdi_ref, = session.call_xenapi("VDI.get_by_name_label", volume_name)
+        LOG.info("Search result is %s", vdi_ref)
+        vdi_uuid = session.call_xenapi("VDI.get_uuid", vdi_ref)
+        return vdi_uuid
+    except Exception:
+        LOG.error("BAAAAM")
+        pass
+
     sr_uuid, label, sr_params = volume_utils.parse_sr_info(connection_data)
     sr_ref = volume_utils.find_sr_by_uuid(session, sr_uuid)
 
