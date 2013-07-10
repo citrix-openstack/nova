@@ -96,7 +96,7 @@ class VolumeOps(object):
             self._session.call_xenapi("SR.scan", sr_ref)
 
             LOG.info("Searching for vdi by name %s", volume_name)
-            vdi_ref = session.call_xenapi("VDI.get_by_name_label", volume_name)
+            vdi_ref = self._session.call_xenapi("VDI.get_by_name_label", volume_name)
             return (rbd_sr_uuid, vdi_uuid)
 
         sr_uuid, sr_label, sr_params = volume_utils.parse_sr_info(
