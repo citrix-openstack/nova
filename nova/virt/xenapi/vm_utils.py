@@ -1480,6 +1480,7 @@ def determine_is_pv(session, vdi_ref, disk_image_type, os_type):
         # 4. ISO
         is_pv = False
     elif not disk_image_type:
+        return True
         LOG.warning(_("Image format is None: trying to determine PV status "
                       "using pygrub; if instance with vdi %s does not boot "
                       "correctly, try with image metadata.") % vdi_ref)
