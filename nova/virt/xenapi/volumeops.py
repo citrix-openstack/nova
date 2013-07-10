@@ -81,10 +81,23 @@ class VolumeOps(object):
     def _connect_volume(self, connection_info, dev_number=None,
                         instance_name=None, vm_ref=None, hotplug=True):
         driver_type = connection_info['driver_volume_type']
-        if driver_type not in ['iscsi', 'xensm']:
+        if driver_type not in ['iscsi', 'xensm', 'rbd']:
             raise exception.VolumeDriverNotFound(driver_type=driver_type)
 
         connection_data = connection_info['data']
+
+        if driver_type == 'rbd':
+            rbd_sr_uuid = '97781b61-55eb-571a-6b93-c80b254342a6'
+            sr_ref = volume_utils.find_sr_by_uuid(self._session, rbd_sr_uuid)
+
+            pool, volume_name = connection_data['name'].split('/')
+
+            LOG.info("Scanning SR")
+            self._session.call_xenapi("SR.scan", sr_ref)
+
+            LOG.info("Searching for vdi by name %s", volume_name)
+            vdi_ref = session.call_xenapi("VDI.get_by_name_label", volume_name)
+            return (rbd_sr_uuid, vdi_uuid)
 
         sr_uuid, sr_label, sr_params = volume_utils.parse_sr_info(
                 connection_data, 'Disk-for:%s' % instance_name)
