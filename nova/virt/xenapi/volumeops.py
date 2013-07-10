@@ -99,9 +99,15 @@ class VolumeOps(object):
             vdi_ref, = self._session.call_xenapi("VDI.get_by_name_label", volume_name)
             LOG.info("Search result is %s", vdi_ref)
             vdi_uuid = self._session.call_xenapi("VDI.get_uuid", vdi_ref)
-            vbd_ref = vm_utils.create_vbd(self._session, vm_ref, vdi_ref,
-                                          dev_number, bootable=False,
-                                          osvol=True)
+
+            if vm_ref:
+                vbd_ref = vm_utils.create_vbd(self._session, vm_ref, vdi_ref,
+                                              dev_number, bootable=False,
+                                              osvol=True)
+
+                if hotplug:
+                    self._session.call_xenapi("VBD.plug", vbd_ref)
+
             return (rbd_sr_uuid, vdi_uuid)
 
         sr_uuid, sr_label, sr_params = volume_utils.parse_sr_info(
