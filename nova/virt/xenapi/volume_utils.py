@@ -62,6 +62,7 @@ def introduce_sr(session, sr_uuid, label, params):
 
     sr_type, sr_desc = _handle_sr_params(params)
 
+    LOG.info("MATE introducing sr with params: %s", params)
     sr_ref = session.call_xenapi('SR.introduce', sr_uuid, label, sr_desc,
             sr_type, '', False, params)
 
