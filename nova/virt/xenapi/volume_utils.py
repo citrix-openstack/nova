@@ -62,12 +62,14 @@ def introduce_sr(session, sr_uuid, label, params):
 
     sr_type, sr_desc = _handle_sr_params(params)
 
-    LOG.error("MATE introducing sr with params: %s", params)
+    extended_params = dict(params, force_tapdisk='true')
+    LOG.error("MATE introducing sr with params: %s", extended_params)
+
     sr_ref = session.call_xenapi('SR.introduce', sr_uuid, label, sr_desc,
-            sr_type, '', False, params)
+            sr_type, '', False, extended_params)
 
     LOG.debug(_('Creating PBD for SR'))
-    pbd_ref = create_pbd(session, sr_ref, params)
+    pbd_ref = create_pbd(session, sr_ref, extended_params)
 
     LOG.debug(_('Plugging SR'))
     session.call_xenapi("PBD.plug", pbd_ref)
