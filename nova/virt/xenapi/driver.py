@@ -1,4 +1,3 @@
-
 # Copyright (c) 2010 Citrix Systems, Inc.
 # Copyright 2010 OpenStack Foundation
 #
@@ -394,10 +393,8 @@ class XenAPIDriver(driver.ComputeDriver):
             'host': self._hypervisor_hostname
         }
 
-    @staticmethod
-    def get_host_ip_addr():
-        xs_url = urlparse.urlparse(CONF.xenapi_connection_url)
-        return xs_url.netloc
+    def get_host_ip_addr(self):
+        return self.get_management_ip_address()
 
     def attach_volume(self, context, connection_info, instance, mountpoint,
                       encryption=None):
@@ -414,8 +411,7 @@ class XenAPIDriver(driver.ComputeDriver):
                                              mountpoint)
 
     def get_console_pool_info(self, console_type):
-        xs_url = urlparse.urlparse(CONF.xenapi_connection_url)
-        return {'address': xs_url.netloc,
+        return {'address': self.get_host_ip_addr(),
                 'username': CONF.xenapi_connection_username,
                 'password': CONF.xenapi_connection_password}
 
@@ -685,6 +681,13 @@ class XenAPISession(object):
                 raise
         self._sessions.put(session)
         return url
+
+    def get_management_ip_address(self):
+        for pif in self.call_xenapi('PIF.get_all'):
+            pif_rec = self.call_xenapi('PIF.get_record', pif)
+            if pif_rec.get('management') is True:
+                return pif_rec['IP']
+        raise Exception('FAILED TO GET IP')
 
     def _populate_session_pool(self, url, user, pw, exception):
         for i in xrange(CONF.xenapi_connection_concurrent - 1):
